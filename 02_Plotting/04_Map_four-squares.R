@@ -40,7 +40,7 @@ allSpecies <- sort(unique(read.csv(paste0(spdir2, 'Species_CLN_matching_v2.csv')
 allScenarios <- c("HST", "GFDL_B1","GFDL_A2","PCM_A2","CNRM_rcp85","CCSM4_rcp85","MIROC_rcp85", 
                   "PCM_B1","MIROC3_2_A2","csiro_A1B","GISS_AOM_A1B","MIROC5_rcp26","MIROC_rcp45",
                   "MIROC_rcp60","GISS_rcp26","MRI_rcp26","MPI_rcp45","IPSL_rcp85","Fgoals_rcp85")
-myrange=c(2:8,11:17)
+myrange=c(2:9,11:19)
 #myrange=13
 
 # Which model type
@@ -57,9 +57,9 @@ rm(noveg)
 
 #Define scenarios to lump:
 wawet = c("PCM_B1","GISS_AOM_A1B","MPI_rcp45","MRI_rcp26","GISS_rcp26")
-howet = c("CCSM4_rcp85","CNRM_rcp85","PCM_A2")
+howet = c("CCSM4_rcp85","CNRM_rcp85","PCM_A2","IPSL_rcp85")
 wadry = c("GFDL_B1", "MIROC5_rcp26","MIROC_rcp45")
-hodry = c("GFDL_A2","MIROC_rcp85","MIROC_rcp60")
+hodry = c("GFDL_A2","MIROC_rcp85","MIROC_rcp60","MIROC3_2_A2","Fgoals_rcp85")
 Gr = list(wawet,howet,wadry,hodry)
 rm(wawet,howet,wadry,hodry)
 
