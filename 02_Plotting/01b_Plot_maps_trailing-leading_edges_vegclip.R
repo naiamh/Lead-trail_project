@@ -12,12 +12,12 @@ Computer <- "HP"
 #-----------------#
 if (Computer == "HP") {
   wdir <- 'C:/Users/Naia Morueta Holme/Documents/Documents_share/Projects/'
-  idir <- 'D:/Lead-trail/Projections/V4/'
-  vdir <- 'D:/Vegetation/PROCESSED/'
+  idir <- 'E:/Lead-trail/Projections/V4/'
+  vdir <- 'E:/Vegetation/PROCESSED/'
   bgdir <- paste0(wdir,'100_Postdoc/Data/Background_layers/PROCESSED/')
   spdir2 <- paste0(wdir,'101_TBC3_modelling/Lead-trail_R-project/Data/Species/')
-  fdir <- 'D:/Lead-trail/Projections/Figures_V4/'
-  spdir <- 'D:/Phylo_modelling/Data/Species/Processed2/'
+  fdir <- 'E:/Lead-trail/Projections/Figures_V4/'
+  spdir <- 'E:/Phylo_modelling/Data/Species/Processed2/'
 }
 
 
@@ -36,8 +36,7 @@ allSpecies <- sort(unique(read.csv(paste0(spdir2, 'Species_CLN_matching_v2.csv')
 allScenarios <- c("HST", "GFDL_B1","GFDL_A2","PCM_A2","CNRM_rcp85","CCSM4_rcp85","MIROC_rcp85", 
                   "PCM_B1","MIROC3_2_A2","csiro_A1B","GISS_AOM_A1B","MIROC5_rcp26","MIROC_rcp45",
                   "MIROC_rcp60","GISS_rcp26","MRI_rcp26","MPI_rcp45","IPSL_rcp85","Fgoals_rcp85")
-myrange=c(2:8,11:17)
-#myrange=13
+myrange=c(2:19)
 
 # Which model type
 mxModelType = "cwd-djf-jja-ppt"
