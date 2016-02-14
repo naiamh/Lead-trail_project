@@ -13,11 +13,11 @@ rm(list=ls())
 #---------------------#
 Computer = 'HP'
 if(Computer == 'HP') {
-  idir <- 'D:/Vegetation/ORIGINAL/'
-  odir <- 'D:/Vegetation/PROCESSED/'
+  idir <- 'E:/Vegetation/ORIGINAL/'
+  odir <- 'E:/Vegetation/PROCESSED/'
   wdir <- 'C:/Users/Naia Morueta Holme/Documents/Documents_share/Projects/'
   bgdir <- paste0(wdir,'100_Postdoc/Data/Background_layers/PROCESSED/')
-  cdir <- 'D:/BCM/CA_2014/Summary/HST/Normals_30years/'
+  cdir <- 'E:/BCM/CA_2014/Summary/HST/Normals_30years/'
   sdir <- paste0(wdir,'101_TBC3_modelling/Lead-trail_R-project/Scripts2/')
   spdir <- paste0(wdir, '101_TBC3_modelling/Lead-trail_R-project/Data/Species/')
 }
@@ -37,25 +37,25 @@ ta.project <- '+proj=aea +datum=NAD83 +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120
 bg.file <- paste0(cdir, 'BCM2014_ppt1951-1980_wy_ave_HST.Rdata')
 clip.file <- paste0(bgdir,"GADM_BayArea_proj.rdata")
 
+r <- raster(paste0(idir, 'cln_veg10'))
 #----------------------------------------#
 # Project original CLN map to Flint proj #
 #----------------------------------------#
-# original cln file
-r <- raster(paste0(idir, 'cln_veg10'))
-
-# get background raster for Bay Area as projection template
-bg <- readRDS(bg.file)
-bay <- readRDS(clip.file)
-bgb <- crop(bg, bay)
-bg1 <- disaggregate(bgb, 9)
-rm(bay,bgb,bg)
-
-clnp <- projectRaster(r, bg1, method='ngb')
-
-clnp <- readAll(clnp)
-saveRDS(clnp, paste0(odir, 'cln_veg10p.rdata'))
-
-rm(bg1,r)
+# # original cln file
+# 
+# # get background raster for Bay Area as projection template
+# bg <- readRDS(bg.file)
+# bay <- readRDS(clip.file)
+# bgb <- crop(bg, bay)
+# bg1 <- disaggregate(bgb, 9)
+# rm(bay,bgb,bg)
+# 
+# clnp <- projectRaster(r, bg1, method='ngb')
+# 
+# clnp <- readAll(clnp)
+# saveRDS(clnp, paste0(odir, 'cln_veg10p.rdata'))
+# 
+# rm(bg1,r)
 
 #------------------#
 # Create CLN masks #
@@ -82,8 +82,8 @@ getm = function(bg, vegmap, ids) {
 }
 
 # Matching with Weiss&Ackerly classification and classification based on Sawyer et al.
-i=1
-for (i in 8:length(Species)) {
+i=9
+for (i in 1:length(Species)) {
   start=Sys.time()
   sp <- Species[i]
   print(sp)
@@ -112,6 +112,25 @@ for (i in 8:length(Species)) {
     mask2 <- getm(bg=bgm,vegmap=cln,ids=ids2)
     saveRDS(mask2, paste0(odir,'CLN_mask2/CLN_mask2_',spname,'.rdata'))
   } else {print('No vegtypes for Sawyer')}
+  
+  # Masking following union of Stu/Ackerly and Sawyer et al. classes
+  # 'Out' flag from Weiss/Ackerly trumps 'In' flag from Sawyer (i.e. most inclusive)
+  sub3 <- subset(lk,Scientific_name==sp & (Include1==1 || Include2==1))
+  row.names <- NULL
+  
+  if(nrow(sub3)>0) {
+    if(all(sub3$In_out=='In')) {
+      ids3 <- unique(sub3$CLN_Code)
+    } else {
+      subout <- subset(sub3, In_out=='Out')
+      print("Some vegtypes where out - double check")
+      allids <- unique(lk$CLN_Code)[!is.na(unique(lk$CLN_Code))]
+      ids3 <- allids[!allids%in%subout$CLN_Code]
+    }
+    mask3 <- getm(bg=bgm,vegmap=cln,ids=ids3)
+    saveRDS(mask3, paste0(odir,'CLN_mask3/CLN_mask3_',spname,'.rdata'))
+  } else {print('No vegtypes either for Weiss-Ackerly or Sawyer')}
+  
   print(Sys.time()-start)
 }
 
@@ -119,7 +138,7 @@ for (i in 8:length(Species)) {
 # Create mask for non-vegetated #
 #-------------------------------#
 
-# Mask of water (59), rural residential (61), urban (56) and cultivated (16)
+# Mask off water (59), rural residential (61), urban (56) and cultivated (16)
 off <- getm(bg=bgm,vegmap=cln,ids=c(59,61,56,16))
 m <- matrix(c(NA,1,1,NA),nrow=2,ncol=2)
 res <- reclassify(off,m)
