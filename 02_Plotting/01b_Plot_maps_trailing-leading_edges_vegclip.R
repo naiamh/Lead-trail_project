@@ -16,7 +16,7 @@ if (Computer == "HP") {
   vdir <- 'E:/Vegetation/PROCESSED/'
   bgdir <- paste0(wdir,'100_Postdoc/Data/Background_layers/PROCESSED/')
   spdir2 <- paste0(wdir,'101_TBC3_modelling/Lead-trail_R-project/Data/Species/')
-  fdir <- 'E:/Lead-trail/Projections/Figures_V4/'
+  fdir <- 'E:/Lead-trail/Projections/Figures_V5/'
   spdir <- 'E:/Phylo_modelling/Data/Species/Processed2/'
 }
 
