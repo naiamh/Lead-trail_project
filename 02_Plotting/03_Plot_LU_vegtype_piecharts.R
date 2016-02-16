@@ -3,9 +3,9 @@
 rm(list=ls())
 
 wdir <- 'C:/Users/Naia Morueta Holme/Documents/Documents_share/Projects/'
-idir <- 'D:/Lead-trail/Projections/Figures_V4/'
+idir <- 'E:/Lead-trail/Projections/Figures_V4/'
 vnamedir <- paste0(wdir,'100_Postdoc/Data/Vegetation/ORIGINAL/')
-odir <- 'D:/Lead-trail/Projections/Figures_V4/Vegpies_each_LU/'
+odir <- 'E:/Lead-trail/Projections/Figures_V5/Vegpies_each_LU/'
 
 allv <- readRDS(paste0(idir,'Vegtypes_in_each_LU.rdata'))
 
@@ -74,8 +74,12 @@ for(i in 1:length(allv2)) {
   d$cumperc <- as.numeric(d$cumperc)
   d$color <- as.character(collookup$hcol[match(d$Vegtype,collookup$Vegtype)])
   
-  figfile <- paste0(odir,names(allv2)[i], '_current_veg_types.png')
-  png(figfile, width=600, height=500)
-  pie(d$freq,labels=d$Vegtype, clockwise=T, cex=0.75,col=d$color)
+  figfile <- paste0(odir,names(allv2)[i], '_current_veg_types.pdf')
+  
+  pdf(figfile, fonts='ArialMT')
+
+  pie(d$freq,labels=d$Vegtype, clockwise=T, cex=0.8,col=d$color, radius=0.5)
   dev.off()
 }
+
+
