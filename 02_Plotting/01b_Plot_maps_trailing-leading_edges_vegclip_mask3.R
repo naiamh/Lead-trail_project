@@ -25,6 +25,7 @@ if (Computer == "HP") {
 # Load libraries #
 #----------------#
 require(raster)
+library(colormap)
 
 #-----------------------#
 # Parameters for script #
@@ -66,7 +67,7 @@ for(i in 1:length(allSpecies)) {
   writeLines(mySpecies)
   #load vegetation mask
   spname <- sub(' ','_',mySpecies)
-  mask3 <- readRDS(paste0(vdir,'CLN_mask3/CLN_mask3_',spname,'.rdata'))
+  mymask <- readRDS(paste0(vdir,'CLN_mask3/CLN_mask3_',spname,'.rdata'))
   
   #load occurrences
   pres <- readRDS(paste(spdir, mySpecies, ".rdata", sep=""))
@@ -88,36 +89,50 @@ for(i in 1:length(allSpecies)) {
       hfile <- paste0(idir,mxModelType,'/',mySpecies,'/','1951-1980_suitability_Bay_HST.tif')
       ffile <- paste0(idir,mxModelType,'/',mySpecies,'/','2070-2099_suitability_Bay_',myScenario,'.tif')
       
-      hst <- raster(hfile)
-      fut <- raster(ffile)
-      
+      r1 <- raster(hfile)
+      r2 <- raster(ffile)
+      delta <- r2 - r1
   
       # Plot Bay Area map with noveg and mask3
       png(figfile, width=3000, height=1500, pointsize = 36)
       
       par(mfrow=c(1,2),mar=c(0.1,0.1,2,0.1))
       
-      ## First plot only clipping noveg
-      plot(mask(fut-hst,noveg270,inverse=T),axes=F,zlim=c(-0.5,0.5),legend=F,
-           col=colorRampPalette(c("red", "white", "blue"))(20))
-      plot(mask(hst,noveg270,inverse=T),axes=F,zlim=c(0,1),legend=F,col=grey.colors(20,start=1,end=0),alpha=0.5,add=T)
-      title(mySpecies)
+      # generate colors using 2d palette, baseline suitability vs suitability delta
+      mycolors <- c("gray50", "blue", "black", "red", "white")
+      v1 <- values(r1)
+      v2 <- values(delta)
+      cols <- colorwheel2d(cbind(v1[!is.na(v1)], v2[!is.na(v2)]), colors=mycolors)
       
+      cols <- colorwheel2d(cbind(values(r1), values(delta)), colors=mycolors)
+      rgb_rasters <- stack(r1, r1, r1)
+      values(rgb_rasters)[which(!is.na(v1)),] <- t(col2rgb(cols))
+      
+      
+      ## First plot only clipping noveg
+      plotRGB(mask(rgb_rasters,noveg270,inverse=T), axes=F,
+              main=mySpecies)
+      
+#       plot(mask(fut-hst,noveg270,inverse=T),axes=F,zlim=c(-0.5,0.5),legend=F,
+#            col=colorRampPalette(c("red", "white", "blue"))(20))
+#       plot(mask(hst,noveg270,inverse=T),axes=F,zlim=c(0,1),legend=F,col=grey.colors(20,start=1,end=0),alpha=0.5,add=T)
+#       title(mySpecies)
+#       
         # add landscape units and occurrences
-        lup <- spTransform(lu,projection(hst))
+        lup <- spTransform(lu,projection(r1))
         plot(lup,add=T)    
         # add occurrence points
-        occur <- spTransform(pres, projection(hst))
+        occur <- spTransform(pres, projection(r1))
         points(occur[lup,],pch=4)
       
   
       ## Second plot masking to current veg type mask 3
       if(file.exists(paste0(vdir,'CLN_mask3/CLN_mask3_',spname,'.rdata'))) {
-        mask3p <- projectRaster(mask3,hst,method='ngb')
+        maskp <- projectRaster(mymask,hst,method='ngb')
       
-        plot(mask(fut-hst,mask1p,inverse=T),axes=F,zlim=c(-0.5,0.5),legend=F,
+        plot(mask(fut-hst,maskp,inverse=T),axes=F,zlim=c(-0.5,0.5),legend=F,
              col=colorRampPalette(c("red", "white", "blue"))(20))
-        plot(mask(hst,mask3p,inverse=T),axes=F,zlim=c(0,1),legend=F,col=grey.colors(20,start=1,end=0),alpha=0.5,add=T)
+        plot(mask(hst,maskp,inverse=T),axes=F,zlim=c(0,1),legend=F,col=grey.colors(20,start=1,end=0),alpha=0.5,add=T)
         title('mask3')
         
           # add landscape units and occurrences
@@ -136,6 +151,8 @@ for(i in 1:length(allSpecies)) {
       
       # Legend
       if(i==1 & a==2) {
+        
+        
         lfile <- paste0(fdir, 'Bay_lead-trail/00_Legend.png')
         png(lfile, width=1800, height=1800, pointsize = 48)
         
